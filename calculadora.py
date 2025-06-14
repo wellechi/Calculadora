@@ -269,14 +269,15 @@ class CalculadoraCientifica:
                 else:
                     resultado = f"f(x) = {pretty(funcao)}"  # Exibe a função simbólica se x não for fornecido
 
-            elif "equação" in operacao.lower():  # Se for uma equação
-                partes = funcao_str_corrigida.split("=")
+            elif "equação 1º grau" in operacao.lower():  # Se for uma equação de 1º grau
+                partes = funcao_str_corrigida.split("=")  # Divide a equação em dois lados
                 if len(partes) == 2:
-                    eq_lado_esquerdo = sympify(partes[0].strip())
-                    eq_lado_direito = sympify(partes[1].strip())
+                    eq_lado_esquerdo = sympify(partes[0].strip())  # Expressão do lado esquerdo
+                    eq_lado_direito = sympify(partes[1].strip())  # Expressão do lado direito
 
-                    eq = Eq(eq_lado_esquerdo, eq_lado_direito)
-                    solucao = solveset(eq, self.vars[0], domain=S.Reals)
+                    eq = Eq(eq_lado_esquerdo, eq_lado_direito)  # Cria a equação para resolver
+
+                    solucao = solveset(eq, self.vars[0], domain=S.Reals)  # Resolve a equação para x
 
                     if solucao == S.EmptySet:
                         resultado = "Nenhuma solução encontrada."

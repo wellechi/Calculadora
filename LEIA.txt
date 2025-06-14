@@ -1,0 +1,11 @@
+"Função" FUNCIONANDO    
+"Limite" FUNCIONANDO
+"Derivada" SENDO TESTADA
+"Integral Indefinida" FALTA TESTES
+"Integral Definida" FALTA TESTES
+"Equação 1º Grau" FALTA TESTES
+"Equação 2º Grau" FALTA TESTES
+"Equação 3º Grau" FALTA TESTES
+
+
+

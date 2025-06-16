@@ -14,7 +14,6 @@ class CalculadoraCientifica:
         self.root.title("Calculadora Científica")
         self.root.state('zoomed')  # Maximiza a janela
         self.root.configure(bg="#000813")  # Cor de fundo do root
-        self.vars = symbols('x y z t')
 
         # Tema moderno escuro
         self.bg_color = "#000813"
@@ -114,10 +113,10 @@ class CalculadoraCientifica:
         # Define as teclas de maneira mais organizada, agora com a tecla "elevado a" (^) adicionada
         teclas = [
             ['7', '8', '9', '(', ')', 'sin(', 'cos(', 'tan('],
-            ['4', '5', '6', '√', 'x^2', 'asin(', 'acos(', 'atan('],
+            ['4', '5', '6', '√', 'oo', 'asin(', 'acos(', 'atan('],
             ['1', '2', '3', '+', '-', 'log(', 'ln(', 'exp('],
             ['0', '.', 'π', 'e', 'x', '/', '*', '^'],  # Adiciona a tecla "elevado a" (^) aqui
-            ['CE', 'DEL', '(', ')', 'abs(', 'sqrt(']
+            ['CE', 'DEL', '<', '>', 'abs(', 'sqrt(']
         ]
 
         for widget in self.frame_teclado.winfo_children():
@@ -222,9 +221,15 @@ class CalculadoraCientifica:
         funcao_str_corrigida = self.corrigir_multiplicacao(funcao_str_corrigida)  # Corrige multiplicação entre número e x
 
         try:
+            # Definindo as variáveis que podem ser usadas nas expressões
+            variaveis = [symbol for symbol in funcao_str_corrigida if symbol.isalpha()]
+            variaveis = list(set(variaveis))  # Remover duplicatas
+            variaveis = symbols(variaveis)  # Criando as variáveis
+
+            funcao = sympify(funcao_str_corrigida, evaluate=True)  # Converte a string para uma expressão simbólica
+
             if "derivada" in operacao.lower():
-                funcao = sympify(funcao_str_corrigida, evaluate=True)  # Converte a string para uma expressão simbólica
-                derivada = diff(funcao, self.vars[0])  # Calcula a derivada
+                derivada = diff(funcao, variaveis[0])  # Calcula a derivada
                 derivada_simplificada = simplify(derivada)  # Simplifica a derivada
                 resultado = pretty(derivada_simplificada)
 
@@ -241,29 +246,35 @@ class CalculadoraCientifica:
                     return
 
                 ponto = sympify(ponto_str)  # Converte o ponto para um valor simbólico
-                funcao = sympify(funcao_str_corrigida, evaluate=True)  # Converte a função
-                resultado = f"{limit(funcao, self.vars[0], ponto)}"  # Calcula o limite
+                resultado = f"{limit(funcao, variaveis[0], ponto)}"  # Calcula o limite
+
+                # Não gera gráfico para operação Limite
+                self.text_resultado.delete("1.0", tk.END)
+                self.text_resultado.insert(tk.END, resultado)
+
+                return  # Não gera gráfico para o limite
 
             elif "integral indefinida" in operacao.lower():
-                funcao = sympify(funcao_str_corrigida, evaluate=True)
-                integral = integrate(funcao, self.vars[0])
+                integral = integrate(funcao, variaveis[0])
                 resultado = pretty(integral) + " + C"  # Adiciona a constante de integração
 
             elif "integral definida" in operacao.lower():
-                funcao = sympify(funcao_str_corrigida, evaluate=True)
                 limite_inf = sympify(self.entrada_limite_inf.get())
                 limite_sup = sympify(self.entrada_limite_sup.get())
-                integral_definida = integrate(funcao, (self.vars[0], limite_inf, limite_sup))  # Calcula a integral definida
+                integral_definida = integrate(funcao, (variaveis[0], limite_inf, limite_sup))  # Calcula a integral definida
                 resultado = pretty(integral_definida)
 
             elif "função" in operacao.lower():  # Se for apenas uma função
-                funcao = sympify(funcao_str_corrigida, evaluate=True)  # Converte a função para uma expressão simbólica
                 valor_x_str = self.entrada_x.get().strip()  # Obtém o valor de x
                 if valor_x_str:
                     try:
-                        valor_x = sympify(valor_x_str)  # Converte o valor de x para um número simbólico
-                        resultado = funcao.subs(self.vars[0], valor_x)  # Substitui x na função e calcula o valor
-                        resultado = f"f({valor_x}) = {resultado}"  # Exibe o valor da função em x
+                        # Converte o valor de x para um número decimal ou simbólico
+                        valor_x = sympify(valor_x_str) if '.' in valor_x_str else float(valor_x_str)  # Verifica se é decimal
+                        resultado = funcao.subs(variaveis[0], valor_x)  # Substitui na função e calcula o valor
+
+                        # Formata o resultado com 2 casas decimais
+                        resultado_formatado = round(resultado, 2)
+                        resultado = f"f(x) = {resultado_formatado}"  # Exibe o valor da função em x
                     except Exception as e:
                         resultado = f"Erro ao calcular f(x) para x={valor_x}: {e}"
                 else:
@@ -277,12 +288,12 @@ class CalculadoraCientifica:
 
                     eq = Eq(eq_lado_esquerdo, eq_lado_direito)  # Cria a equação para resolver
 
-                    solucao = solveset(eq, self.vars[0], domain=S.Reals)  # Resolve a equação para x
+                    solucao = solveset(eq, variaveis[0], domain=S.Reals)  # Resolve a equação para x
 
                     if solucao == S.EmptySet:
                         resultado = "Nenhuma solução encontrada."
                     else:
-                        resultado = f"Solução: x = {solucao}"
+                        resultado = f"Solução: {solucao}"
 
             # Exibe o resultado no campo de texto antes do gráfico
             self.text_resultado.delete("1.0", tk.END)
@@ -292,7 +303,7 @@ class CalculadoraCientifica:
             for widget in self.frame_grafico.winfo_children():
                 widget.destroy()
 
-            if "derivada" not in operacao.lower():  # Não gerar gráfico nas derivadas
+            if "derivada" not in operacao.lower() and "limite" not in operacao.lower():  # Não gerar gráfico nas derivadas e limites
                 self.plotar_funcao(funcao)
 
         except SympifyError:

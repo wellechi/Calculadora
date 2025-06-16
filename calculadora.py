@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
-from sympy import symbols, sympify, Eq, solveset, S, pretty, limit, diff, integrate, exp, simplify
+from sympy import symbols, sympify, Eq, solveset, S, limit, diff, integrate, cos, sin, exp, sqrt
 from sympy.core.sympify import SympifyError
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -262,14 +262,23 @@ class CalculadoraCientifica:
                 return  # Não gera gráfico para o limite
 
             elif "integral indefinida" in operacao.lower():
-                integral = integrate(funcao, variaveis[0])
-                resultado = pretty(integral) + " + C"  # Adiciona a constante de integração
+                # Verificando se a função é uma constante
+                if funcao.free_symbols == set():  # Função constante
+                    resultado = f"Integral indefinida: {funcao} * x + C"
+                else:
+                    integral = integrate(funcao, variaveis[0])  # Calcula a integral indefinida
+                    resultado = str(integral) + " + C"  # Adiciona a constante de integração
+
+                    # Remover multiplicação indesejada (⋅)
+                    resultado = resultado.replace('⋅', '')  # Remove o símbolo de multiplicação indesejado
+                    resultado = resultado.replace('o', '')  # Remove o "o" indesejado
+                    resultado = resultado.replace("cos", "cos")  # Garantir que cos(x) seja corretamente exibido
 
             elif "integral definida" in operacao.lower():
                 limite_inf = sympify(self.entrada_limite_inf.get())
                 limite_sup = sympify(self.entrada_limite_sup.get())
                 integral_definida = integrate(funcao, (variaveis[0], limite_inf, limite_sup))  # Calcula a integral definida
-                resultado = pretty(integral_definida)
+                resultado = str(integral_definida)
 
             elif "função" in operacao.lower():  # Se for apenas uma função
                 valor_x_str = self.entrada_x.get().strip()  # Obtém o valor de x
@@ -342,7 +351,7 @@ class CalculadoraCientifica:
     def plotar_funcao(self, funcao):
         # Gera um gráfico para a função fornecida
         x_vals = [i for i in range(-10, 11)]  # Gera x de -10 a 10
-        y_vals = [funcao.subs(self.vars[0], x) for x in x_vals]
+        y_vals = [funcao.subs(symbols('x'), x) for x in x_vals]  # Substitui x para calcular os valores
 
         fig, ax = plt.subplots(figsize=(3, 2))  # Aumenta ou diminui a largura e altura (em polegadas)
 

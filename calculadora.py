@@ -224,7 +224,7 @@ class CalculadoraCientifica:
             # Definindo as variáveis que podem ser usadas nas expressões
             variaveis = [symbol for symbol in funcao_str_corrigida if symbol.isalpha()]
             variaveis = list(set(variaveis))  # Remover duplicatas
-            variaveis = symbols(variaveis)  # Criando as variáveis
+            variaveis = symbols(variaveis) if variaveis else symbols('x')  # Garante que sempre exista uma variável
 
             funcao = sympify(funcao_str_corrigida, evaluate=True)  # Converte a string para uma expressão simbólica
 

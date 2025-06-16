@@ -229,15 +229,9 @@ class CalculadoraCientifica:
             funcao = sympify(funcao_str_corrigida, evaluate=True)  # Converte a string para uma expressão simbólica
 
             if "derivada" in operacao.lower():
-                # Se a função for um número ou 'x' isolado
-                if funcao.is_number:  # Se for uma constante
-                    resultado = 0  # A derivada de uma constante é 0
-                elif funcao == symbols('x'):  # Se for 'x' isolado
-                    resultado = 1  # A derivada de x é 1
-                else:
-                    derivada = diff(funcao, variaveis[0])  # Calcula a derivada
-                    derivada_simplificada = simplify(derivada)  # Simplifica a derivada
-                    resultado = pretty(derivada_simplificada)
+                derivada = diff(funcao, variaveis[0])  # Calcula a derivada
+                derivada_simplificada = simplify(derivada)  # Simplifica a derivada
+                resultado = pretty(derivada_simplificada)
 
                 # Não gera gráfico nas derivadas
                 self.text_resultado.delete("1.0", tk.END)
@@ -286,12 +280,23 @@ class CalculadoraCientifica:
                         resultado = funcao.subs(variaveis[0], valor_x)  # Substitui na função e calcula o valor
 
                         # Formata o resultado com 2 casas decimais
-                        resultado_formatado = round(resultado, 2)
+                        resultado_formatado = round(resultado, 2)  # Limita o número a 2 casas decimais
                         resultado = f"f(x) = {resultado_formatado}"  # Exibe a função em x
                     except Exception as e:
                         resultado = f"Erro ao calcular f(x) para x={valor_x}: {e}"
                 else:
                     resultado = f"f(x) = {pretty(funcao)}"  # Exibe a função simbólica se x não for fornecido
+
+                # Exibe o resultado no campo de texto antes do gráfico
+                self.text_resultado.delete("1.0", tk.END)
+                self.text_resultado.insert(tk.END, resultado)
+
+                # Exclui qualquer gráfico anterior antes de plotar o novo
+                for widget in self.frame_grafico.winfo_children():
+                    widget.destroy()
+
+                # Agora, gera o gráfico da função para os valores de x
+                self.plotar_funcao(funcao)
 
             elif "equação 1º grau" in operacao.lower():  # Se for uma equação de 1º grau
                 partes = funcao_str_corrigida.split("=")  # Divide a equação em dois lados

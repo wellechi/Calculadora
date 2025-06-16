@@ -246,7 +246,14 @@ class CalculadoraCientifica:
                     return
 
                 ponto = sympify(ponto_str)  # Converte o ponto para um valor simbólico
-                resultado = f"{limit(funcao, variaveis[0], ponto)}"  # Calcula o limite
+                try:
+                    # Verifica se a função é uma constante (não depende de x)
+                    if funcao.free_symbols == set():  # Função sem variáveis (constante)
+                        resultado = f"Limite = {funcao}"  # Limite de uma constante é a própria constante
+                    else:
+                        resultado = f"{limit(funcao, variaveis[0], ponto)}"  # Calcula o limite normalmente
+                except Exception as e:
+                    resultado = f"Erro ao calcular o limite: {e}"
 
                 # Não gera gráfico para operação Limite
                 self.text_resultado.delete("1.0", tk.END)
@@ -274,7 +281,7 @@ class CalculadoraCientifica:
 
                         # Formata o resultado com 2 casas decimais
                         resultado_formatado = round(resultado, 2)
-                        resultado = f"f(x) = {resultado_formatado}"  # Exibe o valor da função em x
+                        resultado = f"f(x) = {resultado_formatado}"  # Exibe a função em x
                     except Exception as e:
                         resultado = f"Erro ao calcular f(x) para x={valor_x}: {e}"
                 else:

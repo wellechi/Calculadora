@@ -229,9 +229,15 @@ class CalculadoraCientifica:
             funcao = sympify(funcao_str_corrigida, evaluate=True)  # Converte a string para uma expressão simbólica
 
             if "derivada" in operacao.lower():
-                derivada = diff(funcao, variaveis[0])  # Calcula a derivada
-                derivada_simplificada = simplify(derivada)  # Simplifica a derivada
-                resultado = pretty(derivada_simplificada)
+                # Se a função for um número ou 'x' isolado
+                if funcao.is_number:  # Se for uma constante
+                    resultado = 0  # A derivada de uma constante é 0
+                elif funcao == symbols('x'):  # Se for 'x' isolado
+                    resultado = 1  # A derivada de x é 1
+                else:
+                    derivada = diff(funcao, variaveis[0])  # Calcula a derivada
+                    derivada_simplificada = simplify(derivada)  # Simplifica a derivada
+                    resultado = pretty(derivada_simplificada)
 
                 # Não gera gráfico nas derivadas
                 self.text_resultado.delete("1.0", tk.END)

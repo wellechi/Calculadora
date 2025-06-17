@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 from sympy import symbols, sympify, Eq, solveset, S, limit, diff, integrate, cos, sin, exp, sqrt
 from sympy.core.sympify import SympifyError
+from sympy import simplify, pretty
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import io
@@ -13,17 +14,17 @@ class CalculadoraCientifica:
         self.root = root
         self.root.title("Calculadora Científica")
         self.root.state('zoomed')  # Maximiza a janela
-        self.root.configure(bg="#000813")  # Cor de fundo do root
+        self.root.configure(bg="#1e1e2f")  # Cor de fundo do root
 
-        # Tema moderno escuro
-        self.bg_color = "#000813"
-        self.fg_color = "#EEEEEE"
-        self.entry_bg = "#5D6674"
-        self.btn_bg = "#00ADB5"
-        self.btn_fg = "#EEEEEE"
-        self.btn_active_bg = "#019ca1"
-        self.font_main = ("Segoe UI", 16)  # Aumenta a fonte principal
-        self.font_small = ("Segoe UI", 14)
+        # Tema moderno escuro com cores diferentes
+        self.bg_color = "#1e1e2f"  # Novo fundo escuro
+        self.fg_color = "#ffecb3"  # Cor de texto suave
+        self.entry_bg = "#2e2e47"  # Cor de fundo da entrada
+        self.btn_bg = "#e91e63"  # Cor de fundo dos botões
+        self.btn_fg = "#ffffff"  # Cor do texto dos botões
+        self.btn_active_bg = "#d81b60"  # Cor do botão quando pressionado
+        self.font_main = ("Arial", 16)  # Aumenta a fonte principal
+        self.font_small = ("Arial", 14)
 
         self.criar_widgets()
         self.atualizar_campos()
@@ -53,9 +54,9 @@ class CalculadoraCientifica:
             "Derivada",
             "Integral Indefinida",
             "Integral Definida",
-            "Equação 1º Grau",
-            "Equação 2º Grau",
-            "Equação 3º Grau"
+            # "Equação 1º Grau",
+            # "Equação 2º Grau",
+            # "Equação 3º Grau"
         ]
         self.combo_operacoes = ttk.Combobox(frame_topo, values=operacoes, state="readonly", width=50, font=self.font_main)
         self.combo_operacoes.current(0)
@@ -87,10 +88,10 @@ class CalculadoraCientifica:
         frame_botoes = tk.Frame(frame_principal, bg=self.bg_color)
         frame_botoes.pack(pady=20)
         self.botao_calcular = tk.Button(frame_botoes, text="Calcular", command=self.calcular_com_thread, width=20, font=self.font_main,
-                                       bg="#FFA500", fg="black", activebackground="#FF8C00", relief=tk.FLAT, bd=0)  # Cor preta para a letra
+                                       bg="#ff5722", fg="black", activebackground="#e64a19", relief=tk.FLAT, bd=0)  # Cor laranja para a letra
         self.botao_calcular.pack(side=tk.LEFT, padx=15)
         self.botao_limpar = tk.Button(frame_botoes, text="Limpar", command=self.limpar_campos, width=20, font=self.font_main,
-                                     bg=self.btn_bg, fg="black", activebackground="#019ca1", relief=tk.FLAT, bd=0)  # Cor preta para a letra
+                                     bg=self.btn_bg, fg="black", activebackground="#e91e63", relief=tk.FLAT, bd=0)  # Cor laranja para a letra
         self.botao_limpar.pack(side=tk.LEFT, padx=15)
 
         # Frame para resultados lado a lado
@@ -145,7 +146,7 @@ class CalculadoraCientifica:
                 else:
                     # Estilo das teclas com bordas retas e cor de fundo para outras teclas
                     btn = tk.Button(self.frame_teclado, text=tecla, width=largura, height=altura, font=("Segoe UI", 12),
-                                    bg="#00ADB5", fg="#000000", activebackground="#019ca1", relief=tk.RAISED, bd=1, command=cmd)
+                                    bg="#ff5722", fg="#ffffff", activebackground="#e64a19", relief=tk.RAISED, bd=1, command=cmd)
                 
                 btn.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
 
